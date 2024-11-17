@@ -118,8 +118,8 @@ class UserCubit extends Cubit<UserState> {
     );
   }
 
-  void masuk(String email, String password, String fcmToken) async {
-    var result = await userRest.masuk(email, password, fcmToken);
+  void masuk(String email, String password) async {
+    var result = await userRest.masuk(email, password);
     result.fold(
       (l) => emit(UserFail(l)),
       (r) => emit(UserAuthenticated(r)),

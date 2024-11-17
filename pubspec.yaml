@@ -15,7 +15,9 @@ dependencies:
   bloc: ^8.1.4
   dartz: ^0.10.1
   dio: ^5.7.0
+  dropdown_search: ^6.0.1
   flutter_bloc: ^8.1.6
+  flutter_captcha: ^1.0.0
   flutter_secure_storage: ^9.2.2
   get_ip_address: ^0.0.7
   jwt_decoder: ^2.0.1

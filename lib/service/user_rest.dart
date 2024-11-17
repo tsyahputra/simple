@@ -224,10 +224,7 @@ class UserRest {
   }
 
   Future<Either<String, UserLoggedIn>> masuk(
-    String email,
-    String password,
-    String fcmToken,
-  ) async {
+      String email, String password) async {
     try {
       var ipAddress = IpAddress(type: RequestType.json);
       dynamic ipData = await ipAddress.getIpAddress();
@@ -242,7 +239,6 @@ class UserRest {
         data: {
           'email': email,
           'password': password,
-          'fcm_token': fcmToken,
           'ip': ipData['ip'],
         },
       );
