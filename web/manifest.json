@@ -2,6 +2,7 @@
     "name": "simple",
     "short_name": "simple",
     "start_url": ".",
+    "id": "/simple/",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#303F9F",
