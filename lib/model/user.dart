@@ -7,6 +7,7 @@ class User {
   String email;
   int instanceId;
   int roleId;
+  String? hashToken;
   String? fcmToken;
   DateTime? modified;
   Role? role;
@@ -18,6 +19,7 @@ class User {
     required this.email,
     required this.instanceId,
     required this.roleId,
+    this.hashToken,
     this.fcmToken,
     this.role,
     this.instance,
@@ -30,6 +32,7 @@ class User {
         email: json["email"],
         instanceId: json["instance_id"],
         roleId: json["role_id"],
+        hashToken: json["hash_token"] ?? '',
         fcmToken: json["fcm_token"] ?? '',
         modified: DateTime.parse(json["modified"]),
         instance: Instance.fromJson(json["instance"]),
@@ -42,6 +45,7 @@ class User {
         "email": email,
         "instance_id": instanceId,
         "role_id": roleId,
+        "hash_token": hashToken ?? "",
         "fcm_token": fcmToken ?? "",
         "modified": modified?.toIso8601String(),
         "instance": instance?.toJson(),
@@ -66,20 +70,24 @@ class Users {
 
 class UserLoggedIn {
   User? user;
-  String? token;
+  String? accessToken;
+  String? refreshToken;
 
   UserLoggedIn({
     required this.user,
-    this.token,
+    this.accessToken,
+    this.refreshToken,
   });
 
   factory UserLoggedIn.fromJson(Map<String, dynamic> json) => UserLoggedIn(
         user: User.fromJson(json["user"]),
-        token: json["token"],
+        accessToken: json["access_token"],
+        refreshToken: json["refresh_token"],
       );
 
   Map<String, dynamic> toJson() => {
         "user": user!.toJson(),
-        "token": token,
+        "access_token": accessToken,
+        "refresh_token": refreshToken,
       };
 }

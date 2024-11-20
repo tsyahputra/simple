@@ -17,7 +17,7 @@ class UserRest {
       options: Options(
         headers: {
           'Accept': 'application/json',
-          'Authorization': 'Bearer ${userLoggedIn.token}',
+          'Authorization': 'Bearer ${userLoggedIn.accessToken}',
         },
       ),
       queryParameters: {
@@ -40,7 +40,7 @@ class UserRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
           },
         ),
       );
@@ -49,7 +49,7 @@ class UserRest {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
@@ -62,7 +62,7 @@ class UserRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
           },
         ),
       );
@@ -71,7 +71,7 @@ class UserRest {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
@@ -84,7 +84,7 @@ class UserRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -96,12 +96,12 @@ class UserRest {
           "instance_id": "${user.instanceId}",
         },
       );
-      return const Right(true);
+      return Right(true);
     } on DioException catch (e) {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
@@ -114,7 +114,7 @@ class UserRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -126,12 +126,12 @@ class UserRest {
           "instance_id": "${user.instanceId}",
         },
       );
-      return const Right(true);
+      return Right(true);
     } on DioException catch (e) {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
@@ -144,7 +144,7 @@ class UserRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -155,12 +155,12 @@ class UserRest {
           "instance_id": user.instanceId,
         },
       );
-      return const Right(true);
+      return Right(true);
     } on DioException catch (e) {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
@@ -176,7 +176,7 @@ class UserRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -186,7 +186,7 @@ class UserRest {
       );
       if (response.statusCode == 200) {
         await LocalStorage.clear();
-        return const Right(true);
+        return Right(true);
       } else {
         return Left(response.data['message']);
       }
@@ -194,7 +194,7 @@ class UserRest {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
@@ -207,18 +207,18 @@ class UserRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
         data: {"id": id},
       );
-      return const Right(true);
+      return Right(true);
     } on DioException catch (e) {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
@@ -249,21 +249,40 @@ class UserRest {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }
 
   Future<Either<String, UserLoggedIn>> getUserLoggedIn() async {
     final userLoggedIn = await LocalStorage.getUserLoggedIn();
-    if (userLoggedIn.token == '') {
-      return const Left('Silahkan login terlebih dahulu.');
+    if (userLoggedIn.accessToken == '') {
+      return Left('Silahkan login terlebih dahulu.');
     }
-    bool hasExpired = JwtDecoder.isExpired(userLoggedIn.token!);
+    bool hasExpired = JwtDecoder.isExpired(userLoggedIn.accessToken!);
     if (!hasExpired) {
       return Right(userLoggedIn);
     } else {
-      return const Left('Sesi anda telah berakhir. Silahkan login kembali.');
+      try {
+        final response = await _dio.get(
+          AppUrl.refreshToken,
+          options: Options(
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ${userLoggedIn.refreshToken}',
+            },
+          ),
+        );
+        UserLoggedIn newUserToken = UserLoggedIn.fromJson(response.data);
+        await LocalStorage.setUserProfile(newUserToken);
+        return Right(newUserToken);
+      } on DioException catch (e) {
+        if (e.response != null) {
+          return Left(e.response!.data['message']);
+        } else {
+          return Left('Connection time out.');
+        }
+      }
     }
   }
 
@@ -284,7 +303,7 @@ class UserRest {
         },
       );
       if (response.statusCode == 200) {
-        return const Right(true);
+        return Right(true);
       } else {
         return Left(response.statusMessage!);
       }
@@ -292,7 +311,7 @@ class UserRest {
       if (e.response != null) {
         return Left(e.response!.data['message']);
       } else {
-        return const Left('Connection time out.');
+        return Left('Connection time out.');
       }
     }
   }

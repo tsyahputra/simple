@@ -14,7 +14,7 @@ class InstanceRest {
       options: Options(
         headers: {
           'Accept': 'application/json',
-          'Authorization': 'Bearer ${userLoggedIn.token}',
+          'Authorization': 'Bearer ${userLoggedIn.accessToken}',
         },
       ),
       queryParameters: {
@@ -37,7 +37,7 @@ class InstanceRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
           },
         ),
       );
@@ -59,7 +59,7 @@ class InstanceRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -90,7 +90,7 @@ class InstanceRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -121,7 +121,7 @@ class InstanceRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),

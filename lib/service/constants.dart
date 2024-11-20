@@ -21,6 +21,8 @@ class AppUrl {
   static String editUser = '$users/edit';
   static String editUserOnly = '$users/editonly';
   static String changePassword = '$users/changepassword';
+
+  static String refreshToken = '$apiUrl/refreshtoken';
 }
 
 List<String> listKab = <String>[

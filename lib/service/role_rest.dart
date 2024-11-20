@@ -15,7 +15,7 @@ class RoleRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
           },
         ),
       );
@@ -39,7 +39,7 @@ class RoleRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -69,7 +69,7 @@ class RoleRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
@@ -99,7 +99,7 @@ class RoleRest {
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ${userLoggedIn.token}',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),

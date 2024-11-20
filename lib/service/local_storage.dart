@@ -12,7 +12,7 @@ class LocalStorage {
   static Future<UserLoggedIn> getUserLoggedIn() async {
     var userLoggedIn = await storage.read(key: 'userLoggedIn');
     if (userLoggedIn == null) {
-      return UserLoggedIn(user: null, token: '');
+      return UserLoggedIn(user: null, accessToken: '', refreshToken: '');
     }
     return UserLoggedIn.fromJson(jsonDecode(userLoggedIn));
   }
