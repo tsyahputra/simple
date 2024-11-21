@@ -4,6 +4,8 @@ class AppUrl {
 
   static String masuk = '$apiUrl/masuk';
   static String verifyCaptcha = '$apiUrl/verifycaptcha';
+  static String getResetOTP = '$apiUrl/resetotp';
+  static String resetPassword = '$apiUrl/resetpassword';
 
   static String instances = '$apiUrl/instances';
   static String viewInstance = '$instances/view';

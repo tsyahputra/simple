@@ -315,4 +315,56 @@ class UserRest {
       }
     }
   }
+
+  Future<Either<String, bool>> getOTPByEmail(String email) async {
+    try {
+      await _dio.post(
+        AppUrl.getResetOTP,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {'email': email},
+      );
+      return Right(true);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(e.response!.data['message']);
+      } else {
+        return Left('Connection time out.');
+      }
+    }
+  }
+
+  Future<Either<String, bool>> resetPassword(
+    String otp,
+    String email,
+    String password,
+  ) async {
+    try {
+      await _dio.put(
+        AppUrl.resetPassword,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {
+          'otp': otp,
+          'email': email,
+          'password': password,
+        },
+      );
+      return Right(true);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(e.response!.data['message']);
+      } else {
+        return Left('Connection time out.');
+      }
+    }
+  }
 }

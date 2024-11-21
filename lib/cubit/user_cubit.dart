@@ -141,4 +141,20 @@ class UserCubit extends Cubit<UserState> {
       (_) => emit(UserVerified()),
     );
   }
+
+  void getOTPByEmail(String email) async {
+    var result = await userRest.getOTPByEmail(email);
+    result.fold(
+      (l) => emit(UserFail(l)),
+      (_) => emit(UserSubmitted()),
+    );
+  }
+
+  void resetPassword(String otp, String email, String password) async {
+    var result = await userRest.resetPassword(otp, email, password);
+    result.fold(
+      (l) => emit(UserFail(l)),
+      (_) => emit(UserSubmitted()),
+    );
+  }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_captcha/flutter_captcha.dart';
 import 'package:simple/cubit/user_cubit.dart';
 import 'package:simple/page/responsive/responsiveness.dart';
+import 'package:simple/page/user/get_otp.dart';
 import 'package:simple/page/user_check.dart';
 import 'package:simple/service/constants.dart';
 import 'package:simple/service/user_rest.dart';
@@ -203,6 +204,7 @@ class _SignInPageState extends State<SignInPage> {
                               },
                             ),
                           ),
+                          onFieldSubmitted: (_) => signIn(),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Tidak boleh kosong';
@@ -212,16 +214,27 @@ class _SignInPageState extends State<SignInPage> {
                         ),
                       ),
                       SizedBox(height: 12.0),
-                      FilledButton(
-                        onPressed: () async {
-                          if (_formState.currentState!.validate()) {
-                            userCubit.masuk(
-                              _emailController.text,
-                              _passwordController.text,
-                            );
-                          }
-                        },
-                        child: Text('Masuk'),
+                      OverflowBar(
+                        children: [
+                          FilledButton(
+                            onPressed: () {
+                              signIn();
+                            },
+                            child: Text('Masuk'),
+                          ),
+                          SizedBox(width: 12.0),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GetOtpPage(),
+                                ),
+                              );
+                            },
+                            child: Text('Lupa password'),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 8.0),
                     ],
@@ -238,6 +251,15 @@ class _SignInPageState extends State<SignInPage> {
         ),
       ],
     );
+  }
+
+  void signIn() {
+    if (_formState.currentState!.validate()) {
+      userCubit.masuk(
+        _emailController.text,
+        _passwordController.text,
+      );
+    }
   }
 
   void showCaptcha(BuildContext context) {
