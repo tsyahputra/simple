@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:get_ip_address/get_ip_address.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:simple/model/role.dart';
 import 'package:simple/model/user.dart';
 import 'package:simple/service/constants.dart';
@@ -259,31 +258,7 @@ class UserRest {
     if (userLoggedIn.accessToken == '') {
       return Left('Silahkan login terlebih dahulu.');
     }
-    bool hasExpired = JwtDecoder.isExpired(userLoggedIn.accessToken!);
-    if (!hasExpired) {
-      return Right(userLoggedIn);
-    } else {
-      try {
-        final response = await _dio.get(
-          AppUrl.refreshToken,
-          options: Options(
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': 'Bearer ${userLoggedIn.refreshToken}',
-            },
-          ),
-        );
-        UserLoggedIn newUserToken = UserLoggedIn.fromJson(response.data);
-        await LocalStorage.setUserProfile(newUserToken);
-        return Right(newUserToken);
-      } on DioException catch (e) {
-        if (e.response != null) {
-          return Left(e.response!.data['message']);
-        } else {
-          return Left('Connection time out.');
-        }
-      }
-    }
+    return Right(userLoggedIn);
   }
 
   Future<Either<String, bool>> verifyCaptcha() async {
