@@ -8,12 +8,7 @@ import 'package:simple/page/user_check.dart';
 import 'package:simple/service/constants.dart';
 import 'package:simple/service/local_storage.dart';
 
-enum DrawerSelection {
-  kantor,
-  hakakses,
-  pengguna,
-  profil,
-}
+enum DrawerSelection { kantor, hakakses, pengguna, profil }
 
 class AdminBasePage extends StatefulWidget {
   final User userLoggedIn;
@@ -37,10 +32,7 @@ class _AdminBasePageState extends State<AdminBasePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.userLoggedIn.instance!.nama),
-        actions: [
-          Text(widget.userLoggedIn.nama),
-          SizedBox(width: 8.0),
-        ],
+        actions: [Text(widget.userLoggedIn.nama), SizedBox(width: 8.0)],
       ),
       body: Row(
         children: [
@@ -48,11 +40,7 @@ class _AdminBasePageState extends State<AdminBasePage> {
           Expanded(
             child: Container(
               alignment: Alignment.topLeft,
-              padding: EdgeInsets.only(
-                left: 24.0,
-                right: 24.0,
-                top: 6.0,
-              ),
+              padding: EdgeInsets.only(left: 24.0, right: 24.0, top: 6.0),
               child: _currentPage,
             ),
           ),
@@ -63,9 +51,7 @@ class _AdminBasePageState extends State<AdminBasePage> {
 
   Widget adminMenuWeb() {
     return NavigationRail(
-      leading: CircleAvatar(
-        child: Image.asset('images/foreground.png'),
-      ),
+      leading: CircleAvatar(child: Image.asset('images/pengayoman.png')),
       backgroundColor: Theme.of(context).focusColor,
       labelType: NavigationRailLabelType.all,
       onDestinationSelected: (index) {
@@ -77,6 +63,10 @@ class _AdminBasePageState extends State<AdminBasePage> {
               _currentPage = InstancesPage();
               break;
             case 1:
+              _drawerSelection = DrawerSelection.hakakses;
+              _currentPage = RolesPage();
+              break;
+            case 2:
               _drawerSelection = DrawerSelection.pengguna;
               _currentPage = UsersPage();
               break;
@@ -129,13 +119,11 @@ class _AdminBasePageState extends State<AdminBasePage> {
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-            ),
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
             accountName: Text(widget.userLoggedIn.nama),
             accountEmail: Text(widget.userLoggedIn.email),
             currentAccountPicture: CircleAvatar(
-              child: Image.asset('images/foreground.png'),
+              child: Image.asset('images/pengayoman.png'),
             ),
           ),
           ListTile(
@@ -202,25 +190,21 @@ class _AdminBasePageState extends State<AdminBasePage> {
               child: Text('Tidak'),
             ),
             FilledButton(
-              onPressed: () {
-                _logout(context);
+              onPressed: () async {
+                await LocalStorage.clear();
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => UserCheckPoint()),
+                    (route) => false,
+                  );
+                }
               },
               child: Text('Ya'),
             ),
           ],
         );
       },
-    );
-  }
-
-  void _logout(context) async {
-    await LocalStorage.clear();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserCheckPoint(),
-      ),
-      (route) => false,
     );
   }
 }

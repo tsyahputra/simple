@@ -170,7 +170,7 @@ class UserRest {
   ) async {
     final userLoggedIn = await LocalStorage.getUserLoggedIn();
     try {
-      final response = await _dio.patch(
+      await _dio.patch(
         '${AppUrl.changePassword}/$userId',
         options: Options(
           headers: {
@@ -179,16 +179,10 @@ class UserRest {
             'Content-Type': 'application/json',
           },
         ),
-        data: {
-          "password": password,
-        },
+        data: {"password": password},
       );
-      if (response.statusCode == 200) {
-        await LocalStorage.clear();
-        return Right(true);
-      } else {
-        return Left(response.data['message']);
-      }
+      await LocalStorage.clear();
+      return Right(true);
     } on DioException catch (e) {
       if (e.response != null) {
         return Left(e.response!.data['message']);
@@ -198,7 +192,7 @@ class UserRest {
     }
   }
 
-  Future<Either<String, bool>> deleteUser(String id) async {
+  Future<Either<String, bool>> deleteUser(int id) async {
     final userLoggedIn = await LocalStorage.getUserLoggedIn();
     try {
       await _dio.delete(
@@ -223,7 +217,10 @@ class UserRest {
   }
 
   Future<Either<String, UserLoggedIn>> masuk(
-      String email, String password) async {
+    String email,
+    String password,
+    String fcmToken,
+  ) async {
     try {
       var ipAddress = IpAddress(type: RequestType.json);
       dynamic ipData = await ipAddress.getIpAddress();
@@ -238,6 +235,7 @@ class UserRest {
         data: {
           'email': email,
           'password': password,
+          'fcm_token': fcmToken,
           'ip': ipData['ip'],
         },
       );
@@ -273,9 +271,7 @@ class UserRest {
             'Content-Type': 'application/json',
           },
         ),
-        data: {
-          'ip': ipData['ip'],
-        },
+        data: {'ip': ipData['ip']},
       );
       if (response.statusCode == 200) {
         return Right(true);
@@ -291,17 +287,41 @@ class UserRest {
     }
   }
 
-  Future<Either<String, bool>> getOTPByEmail(String email) async {
+  Future<Either<String, TwoFASecret>> generate2FASecret() async {
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
     try {
-      await _dio.post(
-        AppUrl.getResetOTP,
+      final response = await _dio.get(
+        AppUrl.generate2FASecret,
         options: Options(
           headers: {
             'Accept': 'application/json',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
+          },
+        ),
+      );
+      return Right(TwoFASecret.fromJson(response.data));
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(e.response!.data['message']);
+      } else {
+        return Left('Connection time out.');
+      }
+    }
+  }
+
+  Future<Either<String, bool>> verifyAndEnable2FA(String code) async {
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.post(
+        AppUrl.verifyEnable2FA,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
             'Content-Type': 'application/json',
           },
         ),
-        data: {'email': email},
+        data: {"code": code},
       );
       return Right(true);
     } on DioException catch (e) {
@@ -313,13 +333,60 @@ class UserRest {
     }
   }
 
-  Future<Either<String, bool>> resetPassword(
-    String otp,
+  Future<Either<String, bool>> disable2FA(String userId) async {
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.get(
+        '${AppUrl.disable2FA}/$userId',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ${userLoggedIn.accessToken}',
+          },
+        ),
+      );
+      return Right(true);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(e.response!.data['message']);
+      } else {
+        return Left('Connection time out.');
+      }
+    }
+  }
+
+  Future<Either<String, String>> verifyTwoFAResetPassword(
     String email,
-    String password,
+    String code,
   ) async {
     try {
-      await _dio.put(
+      final response = await _dio.post(
+        AppUrl.verify2FAReset,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {"email": email, "code": code},
+      );
+      return Right(response.data['reset_token']);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(e.response!.data['message']);
+      } else {
+        return Left('Connection time out.');
+      }
+    }
+  }
+
+  Future<Either<String, bool>> resetPassword(
+    String email,
+    String password,
+    String resetToken,
+  ) async {
+    try {
+      await _dio.post(
         AppUrl.resetPassword,
         options: Options(
           headers: {
@@ -327,11 +394,7 @@ class UserRest {
             'Content-Type': 'application/json',
           },
         ),
-        data: {
-          'otp': otp,
-          'email': email,
-          'password': password,
-        },
+        data: {"email": email, "password": password, "reset_token": resetToken},
       );
       return Right(true);
     } on DioException catch (e) {

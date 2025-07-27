@@ -29,27 +29,28 @@ class _UserCheckPointState extends State<UserCheckPoint> {
         child: BlocListener<UserCubit, UserState>(
           listener: (context, state) {
             if (state is UserFail) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.errorMessage)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
               Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => SignInPage(),
-                  ),
-                  (Route<dynamic> route) => false);
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => SignInPage(),
+                ),
+                (Route<dynamic> route) => false,
+              );
             } else if (state is UserAuthenticated) {
               switch (state.userLoggedIn.user!.roleId) {
                 // Admin
                 case 1:
                   Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => AdminBasePage(
-                          userLoggedIn: state.userLoggedIn.user!,
-                        ),
-                      ),
-                      (Route<dynamic> route) => false);
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          AdminBasePage(userLoggedIn: state.userLoggedIn.user!),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
                   break;
                 // Koordinator
                 // case 2:
@@ -86,7 +87,7 @@ class _UserCheckPointState extends State<UserCheckPoint> {
               }
             }
           },
-          child: CircularProgressIndicator(),
+          child: Center(child: CircularProgressIndicator()),
         ),
       ),
     );

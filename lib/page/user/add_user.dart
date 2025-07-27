@@ -35,9 +35,9 @@ class _AddUserPageState extends State<AddUserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah pengguna')),
+      appBar: AppBar(title: Text('Tambah pengguna')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: BlocProvider<UserCubit>(
           create: (context) => userCubit,
           child: BlocConsumer<UserCubit, UserState>(
@@ -45,13 +45,14 @@ class _AddUserPageState extends State<AddUserPage> {
               if (state is UserSubmitted) {
                 Navigator.pop(context, true);
               } else if (state is UserFail) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
               }
             },
             builder: (context, state) {
               if (state is! BeforeAddUser) {
-                return CircularProgressIndicator();
+                return Center(child: CircularProgressIndicator());
               } else {
                 final instances = state.instancesRoles.instances;
                 final roles = state.instancesRoles.roles;
@@ -77,7 +78,7 @@ class _AddUserPageState extends State<AddUserPage> {
                         keyboardType: TextInputType.text,
                         textCapitalization: TextCapitalization.sentences,
                       ),
-                      const SizedBox(height: 12.0),
+                      SizedBox(height: 12.0),
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
@@ -94,7 +95,7 @@ class _AddUserPageState extends State<AddUserPage> {
                         },
                         keyboardType: TextInputType.emailAddress,
                       ),
-                      const SizedBox(height: 12.0),
+                      SizedBox(height: 12.0),
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscureText,
@@ -104,9 +105,11 @@ class _AddUserPageState extends State<AddUserPage> {
                           ),
                           labelText: 'Kata kunci',
                           suffixIcon: IconButton(
-                            icon: Icon(_obscureText
-                                ? Icons.visibility_off
-                                : Icons.visibility),
+                            icon: Icon(
+                              _obscureText
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _obscureText = !_obscureText;
@@ -128,14 +131,14 @@ class _AddUserPageState extends State<AddUserPage> {
                             return 'Harus memiliki satu atau lebih huruf kapital.';
                           }
                           if (!RegExp(
-                                  r'^(?=.*?[!@#$&*~`)\%\-(_+=;:,.<>/?"[{\]}\|^])')
-                              .hasMatch(value)) {
+                            r'^(?=.*?[!@#$&*~`)\%\-(_+=;:,.<>/?"[{\]}\|^])',
+                          ).hasMatch(value)) {
                             return 'Harus memiliki minimal satu atau lebih spesial karakter.';
                           }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 12.0),
+                      SizedBox(height: 12.0),
                       TextFormField(
                         controller: _repeatpasswordController,
                         obscureText: _repeatobscureText,
@@ -145,9 +148,11 @@ class _AddUserPageState extends State<AddUserPage> {
                           ),
                           labelText: 'Ulangi kata kunci',
                           suffixIcon: IconButton(
-                            icon: Icon(_repeatobscureText
-                                ? Icons.visibility_off
-                                : Icons.visibility),
+                            icon: Icon(
+                              _repeatobscureText
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _repeatobscureText = !_repeatobscureText;
@@ -162,7 +167,7 @@ class _AddUserPageState extends State<AddUserPage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 12.0),
+                      SizedBox(height: 12.0),
                       DropdownSearch<Instance>(
                         decoratorProps: DropDownDecoratorProps(
                           decoration: InputDecoration(
@@ -173,9 +178,7 @@ class _AddUserPageState extends State<AddUserPage> {
                           ),
                         ),
                         suffixProps: DropdownSuffixProps(
-                          clearButtonProps: ClearButtonProps(
-                            isVisible: true,
-                          ),
+                          clearButtonProps: ClearButtonProps(isVisible: true),
                         ),
                         compareFn: (item, selectedItem) {
                           return item.id == selectedItem.id;
@@ -186,9 +189,7 @@ class _AddUserPageState extends State<AddUserPage> {
                           showSearchBox: true,
                           showSelectedItems: true,
                           itemBuilder: (ctx, item, isDis, isSel) {
-                            return ListTile(
-                              title: Text(item.nama),
-                            );
+                            return ListTile(title: Text(item.nama));
                           },
                         ),
                         items: (filter, loadProps) {
@@ -215,7 +216,7 @@ class _AddUserPageState extends State<AddUserPage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 12.0),
+                      SizedBox(height: 12.0),
                       DropdownSearch<Role>(
                         decoratorProps: DropDownDecoratorProps(
                           decoration: InputDecoration(
@@ -226,9 +227,7 @@ class _AddUserPageState extends State<AddUserPage> {
                           ),
                         ),
                         suffixProps: DropdownSuffixProps(
-                          clearButtonProps: ClearButtonProps(
-                            isVisible: true,
-                          ),
+                          clearButtonProps: ClearButtonProps(isVisible: true),
                         ),
                         compareFn: (item, selectedItem) {
                           return item.id == selectedItem.id;
@@ -239,24 +238,17 @@ class _AddUserPageState extends State<AddUserPage> {
                           showSearchBox: true,
                           showSelectedItems: true,
                           itemBuilder: (ctx, item, isDis, isSel) {
-                            return ListTile(
-                              title: Text(item.nama),
-                            );
+                            return ListTile(title: Text(item.nama));
                           },
                         ),
                         items: (filter, loadProps) {
                           if (filter.length > 2) {
-                            return roles.where(
-                              (e) {
-                                final sebagai = e.nama.toLowerCase();
-                                return e.nama != 'Administrator' &&
-                                    sebagai.contains(filter);
-                              },
-                            ).toList();
+                            return roles.where((e) {
+                              final sebagai = e.nama.toLowerCase();
+                              return sebagai.contains(filter);
+                            }).toList();
                           }
-                          return roles
-                              .where((e) => e.nama != 'Administrator')
-                              .toList();
+                          return roles.toList();
                         },
                         dropdownBuilder: (context, selectedItem) {
                           if (selectedItem == null) {
@@ -273,7 +265,7 @@ class _AddUserPageState extends State<AddUserPage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16.0),
+                      SizedBox(height: 16.0),
                       FilledButton.icon(
                         onPressed: () {
                           if (_formState.currentState!.validate()) {
@@ -288,8 +280,8 @@ class _AddUserPageState extends State<AddUserPage> {
                             );
                           }
                         },
-                        icon: const Icon(Icons.save),
-                        label: const Text('Simpan'),
+                        icon: Icon(Icons.save),
+                        label: Text('Simpan'),
                       ),
                     ],
                   ),

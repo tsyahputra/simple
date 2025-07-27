@@ -38,9 +38,9 @@ class _EditInstancePageState extends State<EditInstancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ubah data kantor')),
+      appBar: AppBar(title: Text('Ubah data kantor')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: BlocProvider(
           create: (context) => instanceCubit,
           child: BlocListener<InstanceCubit, InstanceState>(
@@ -48,8 +48,9 @@ class _EditInstancePageState extends State<EditInstancePage> {
               if (state is InstanceSubmitted) {
                 Navigator.pop(context, true);
               } else if (state is InstanceFail) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
               }
             },
             child: Form(
@@ -74,7 +75,7 @@ class _EditInstancePageState extends State<EditInstancePage> {
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _alamatController,
                     decoration: InputDecoration(
@@ -93,7 +94,7 @@ class _EditInstancePageState extends State<EditInstancePage> {
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   DropdownButtonFormField(
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -102,21 +103,16 @@ class _EditInstancePageState extends State<EditInstancePage> {
                       labelText: 'Kabupaten',
                     ),
                     value: _kabupaten,
-                    items: listKab.map(
-                      (e) {
-                        return DropdownMenuItem(
-                          value: e,
-                          child: Text(e),
-                        );
-                      },
-                    ).toList(),
+                    items: listKab.map((e) {
+                      return DropdownMenuItem(value: e, child: Text(e));
+                    }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _kabupaten = value!;
                       });
                     },
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _provinsiController,
                     decoration: InputDecoration(
@@ -134,7 +130,7 @@ class _EditInstancePageState extends State<EditInstancePage> {
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _telpController,
                     decoration: InputDecoration(
@@ -145,7 +141,7 @@ class _EditInstancePageState extends State<EditInstancePage> {
                     ),
                     keyboardType: TextInputType.phone,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -156,27 +152,29 @@ class _EditInstancePageState extends State<EditInstancePage> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   Text(
                     'Pembaharuan terakhir pada ${DateFormat('dd MMMM yyyy, HH:mm WIB', 'id_ID').format(widget.instance.modified!.toLocal())}',
                   ),
-                  const SizedBox(height: 16.0),
+                  SizedBox(height: 16.0),
                   FilledButton.icon(
                     onPressed: () {
                       if (_formState.currentState!.validate()) {
-                        instanceCubit.editInstance(Instance(
-                          id: widget.instance.id,
-                          nama: _nameController.text,
-                          alamat: _alamatController.text,
-                          kabupaten: _kabupaten,
-                          provinsi: _provinsiController.text,
-                          telp: _telpController.text,
-                          email: _emailController.text,
-                        ));
+                        instanceCubit.editInstance(
+                          Instance(
+                            id: widget.instance.id,
+                            nama: _nameController.text,
+                            alamat: _alamatController.text,
+                            kabupaten: _kabupaten,
+                            provinsi: _provinsiController.text,
+                            telp: _telpController.text,
+                            email: _emailController.text,
+                          ),
+                        );
                       }
                     },
-                    icon: const Icon(Icons.save),
-                    label: const Text('Simpan'),
+                    icon: Icon(Icons.save),
+                    label: Text('Simpan'),
                   ),
                 ],
               ),

@@ -6,6 +6,7 @@ import 'package:simple/cubit/user_cubit.dart';
 import 'package:simple/model/instance.dart';
 import 'package:simple/model/role.dart';
 import 'package:simple/model/user.dart';
+import 'package:simple/page/user/two_fa_setup.dart';
 import 'package:simple/service/user_rest.dart';
 
 class EditUserPage extends StatefulWidget {
@@ -52,13 +53,14 @@ class _EditUserPageState extends State<EditUserPage> {
               if (state is UserSubmitted) {
                 Navigator.pop(context, true);
               } else if (state is UserFail) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
               }
             },
             builder: (context, state) {
               if (state is! BeforeAddUser) {
-                return CircularProgressIndicator();
+                return Center(child: CircularProgressIndicator());
               } else {
                 final instances = state.instancesRoles.instances;
                 final roles = state.instancesRoles.roles;
@@ -126,9 +128,11 @@ class _EditUserPageState extends State<EditUserPage> {
                             ),
                             labelText: 'Kata kunci',
                             suffixIcon: IconButton(
-                              icon: Icon(_obscureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility),
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
                               onPressed: () {
                                 setState(() {
                                   _obscureText = !_obscureText;
@@ -150,8 +154,8 @@ class _EditUserPageState extends State<EditUserPage> {
                               return 'Harus memiliki satu atau lebih huruf kapital.';
                             }
                             if (!RegExp(
-                                    r'^(?=.*?[!@#$&*~`)\%\-(_+=;:,.<>/?"[{\]}\|^])')
-                                .hasMatch(value)) {
+                              r'^(?=.*?[!@#$&*~`)\%\-(_+=;:,.<>/?"[{\]}\|^])',
+                            ).hasMatch(value)) {
                               return 'Harus memiliki minimal satu atau lebih spesial karakter.';
                             }
                             return null;
@@ -168,9 +172,11 @@ class _EditUserPageState extends State<EditUserPage> {
                             ),
                             labelText: 'Ulangi kata kunci',
                             suffixIcon: IconButton(
-                              icon: Icon(_repeatobscureText
-                                  ? Icons.visibility_off
-                                  : Icons.visibility),
+                              icon: Icon(
+                                _repeatobscureText
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
                               onPressed: () {
                                 setState(() {
                                   _repeatobscureText = !_repeatobscureText;
@@ -196,9 +202,7 @@ class _EditUserPageState extends State<EditUserPage> {
                           ),
                         ),
                         suffixProps: DropdownSuffixProps(
-                          clearButtonProps: ClearButtonProps(
-                            isVisible: true,
-                          ),
+                          clearButtonProps: ClearButtonProps(isVisible: true),
                         ),
                         compareFn: (item, selectedItem) {
                           return item.id == selectedItem.id;
@@ -209,15 +213,11 @@ class _EditUserPageState extends State<EditUserPage> {
                           showSearchBox: true,
                           showSelectedItems: true,
                           itemBuilder: (ctx, item, isDis, isSel) {
-                            return ListTile(
-                              title: Text(item.nama),
-                            );
+                            return ListTile(title: Text(item.nama));
                           },
                         ),
                         selectedItem: instances
-                            .where(
-                              (e) => e.id == instanceId,
-                            )
+                            .where((e) => e.id == instanceId)
                             .first,
                         items: (filter, loadProps) {
                           if (filter.length > 2) {
@@ -254,9 +254,7 @@ class _EditUserPageState extends State<EditUserPage> {
                           ),
                         ),
                         suffixProps: DropdownSuffixProps(
-                          clearButtonProps: ClearButtonProps(
-                            isVisible: true,
-                          ),
+                          clearButtonProps: ClearButtonProps(isVisible: true),
                         ),
                         compareFn: (item, selectedItem) {
                           return item.id == selectedItem.id;
@@ -267,25 +265,17 @@ class _EditUserPageState extends State<EditUserPage> {
                           showSearchBox: true,
                           showSelectedItems: true,
                           itemBuilder: (ctx, item, isDis, isSel) {
-                            return ListTile(
-                              title: Text(item.nama),
-                            );
+                            return ListTile(title: Text(item.nama));
                           },
                         ),
-                        selectedItem: roles
-                            .where(
-                              (e) => e.id == roleId,
-                            )
-                            .first,
+                        selectedItem: roles.where((e) => e.id == roleId).first,
                         items: (filter, loadProps) {
                           if (filter.length > 2) {
-                            return roles.where(
-                              (e) {
-                                final sebagai = e.nama.toLowerCase();
-                                return e.nama != 'Administrator' &&
-                                    sebagai.contains(filter);
-                              },
-                            ).toList();
+                            return roles.where((e) {
+                              final sebagai = e.nama.toLowerCase();
+                              return e.nama != 'Administrator' &&
+                                  sebagai.contains(filter);
+                            }).toList();
                           }
                           return roles
                               .where((e) => e.nama != 'Administrator')
@@ -306,6 +296,29 @@ class _EditUserPageState extends State<EditUserPage> {
                           return null;
                         },
                       ),
+                      SizedBox(height: 12.0),
+                      widget.user.twoFAEnabled!
+                          ? Row(children: [Text('2FA telah aktif')])
+                          : Row(
+                              children: [
+                                Text('2FA belum aktif, aktifkan?'),
+                                SizedBox(width: 12.0),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => TwoFASetupPage(),
+                                      ),
+                                    );
+                                    if (context.mounted) {
+                                      Navigator.pop(context, true);
+                                    }
+                                  },
+                                  child: Text('Ya, aktifkan'),
+                                ),
+                              ],
+                            ),
                       SizedBox(height: 12.0),
                       Text(
                         'Pembaharuan terakhir pada ${DateFormat('dd MMMM yyyy, HH:mm WIB', 'id_ID').format(widget.user.modified!.toLocal())}',
@@ -343,10 +356,21 @@ class _EditUserPageState extends State<EditUserPage> {
                             icon: Icon(Icons.save),
                             label: Text('Simpan'),
                           ),
+                          if (widget.user.twoFAEnabled!) SizedBox(width: 12.0),
+                          if (widget.user.twoFAEnabled!)
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                userCubit.disable2FA(
+                                  widget.user.id!.toString(),
+                                );
+                              },
+                              icon: Icon(Icons.sync_disabled),
+                              label: Text('Matikan 2FA'),
+                            ),
                           SizedBox(width: 12.0),
-                          FilledButton.icon(
+                          ElevatedButton.icon(
                             onPressed: () {
-                              userCubit.deleteUser(widget.user.id!.toString());
+                              userCubit.deleteUser(widget.user.id!);
                             },
                             icon: Icon(Icons.delete_forever),
                             label: Text('Hapus'),

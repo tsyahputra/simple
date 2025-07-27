@@ -4,8 +4,7 @@ import 'package:simple/page/user_check.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('id_ID', null)
-      .then((_) => runApp(const MyApp()));
+  await initializeDateFormatting('id_ID', null).then((_) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -16,16 +15,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Simple',
       theme: ThemeData(
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
         ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        cardTheme: CardTheme(
-          color: Colors.deepPurple[700],
-          elevation: 4,
-        ),
-        useMaterial3: true,
       ),
       home: UserCheckPoint(),
     );

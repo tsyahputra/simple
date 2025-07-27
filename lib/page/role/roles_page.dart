@@ -29,13 +29,14 @@ class _RolesPageState extends State<RolesPage> {
       child: BlocConsumer<RoleCubit, RoleState>(
         listener: (context, state) {
           if (state is RoleFail) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
           }
         },
         builder: (context, state) {
           if (state is! RoleLoaded) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           } else {
             return SingleChildScrollView(
               child: Column(
@@ -86,9 +87,7 @@ class _RolesPageState extends State<RolesPage> {
         onTap: () async {
           var result = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => EditRolePage(role: role),
-            ),
+            MaterialPageRoute(builder: (context) => EditRolePage(role: role)),
           );
           if (result != null) roleCubit.getAllRole();
         },

@@ -5,6 +5,8 @@ sealed class UserState {}
 
 final class UserInitial extends UserState {}
 
+final class UserLoading extends UserState {}
+
 final class UserSubmitted extends UserState {}
 
 final class UserVerified extends UserState {}
@@ -26,11 +28,7 @@ final class UsersLoaded extends UserState {
     this.total = 0,
   });
 
-  UsersLoaded copyWith({
-    List<User>? users,
-    bool? hasReachedMax,
-    int? total,
-  }) {
+  UsersLoaded copyWith({List<User>? users, bool? hasReachedMax, int? total}) {
     return UsersLoaded(
       users: users ?? this.users,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
@@ -61,4 +59,16 @@ final class UserFail extends UserState {
   final String errorMessage;
 
   UserFail(this.errorMessage);
+}
+
+final class TwoFASecretGenerated extends UserState {
+  final TwoFASecret twoFASecret;
+
+  TwoFASecretGenerated(this.twoFASecret);
+}
+
+final class ResetTokenReceived extends UserState {
+  final String resetToken;
+
+  ResetTokenReceived(this.resetToken);
 }

@@ -20,9 +20,8 @@ class SignInPage extends StatefulWidget {
 
 class _SignInPageState extends State<SignInPage> {
   UserCubit userCubit = UserCubit(UserRest());
-  final captchaController = FlutterCaptchaController(
-    random: Random.secure(),
-  )..init();
+  final captchaController = FlutterCaptchaController(random: Random.secure())
+    ..init();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formState = GlobalKey<FormState>();
@@ -52,15 +51,17 @@ class _SignInPageState extends State<SignInPage> {
                 captchaController.reset();
                 showCaptcha(context);
               }
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
             } else if (state is UserAuthenticated) {
               Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => UserCheckPoint(),
-                  ),
-                  (Route<dynamic> route) => false);
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => UserCheckPoint(),
+                ),
+                (Route<dynamic> route) => false,
+              );
             } else if (state is CaptchaFail) {
               captchaController.reset();
               showCaptcha(context);
@@ -118,12 +119,7 @@ class _SignInPageState extends State<SignInPage> {
       child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(12.0),
-          child: Center(
-            child: SizedBox(
-              width: 375,
-              child: loginForm(),
-            ),
-          ),
+          child: Center(child: SizedBox(width: 375, child: loginForm())),
         ),
       ),
     );
@@ -246,7 +242,7 @@ class _SignInPageState extends State<SignInPage> {
         ),
         SizedBox(height: 8.0),
         Text(
-          '\u00a9 2024 Kantor Wilayah Kementerian Hukum dan HAM Jambi',
+          '\u00a9 2025 Kantor Wilayah Kementerian Hukum Jambi',
           style: Theme.of(context).textTheme.labelSmall,
         ),
       ],
@@ -255,48 +251,42 @@ class _SignInPageState extends State<SignInPage> {
 
   void signIn() {
     if (_formState.currentState!.validate()) {
-      userCubit.masuk(
-        _emailController.text,
-        _passwordController.text,
-      );
+      userCubit.masuk(_emailController.text, _passwordController.text, '');
     }
   }
 
   void showCaptcha(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) {
-        return Scaffold(
-          body: Center(
-            child: FlutterCaptcha(
-              controller: captchaController,
-              crossLine: (
-                color: Theme.of(context).primaryColor,
-                width: 10,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) {
+          return Scaffold(
+            body: Center(
+              child: FlutterCaptcha(
+                controller: captchaController,
+                crossLine: (color: Theme.of(context).primaryColor, width: 10),
+                fit: BoxFit.cover,
+                draggingBuilder: (_, child) =>
+                    Opacity(opacity: 0.5, child: child),
+                child: Image.asset('images/pengayoman.png'),
               ),
-              fit: BoxFit.cover,
-              draggingBuilder: (_, child) => Opacity(
-                opacity: 0.5,
-                child: child,
-              ),
-              child: Image.asset('images/pengayoman.png'),
             ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              if (captchaController.checkSolution()) {
-                Navigator.of(context).pop();
-              } else {
-                captchaController.reset();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('Capctha anda salah'),
-                ));
-              }
-            },
-            child: Icon(Icons.check),
-          ),
-        );
-      },
-    ));
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                if (captchaController.checkSolution()) {
+                  Navigator.of(context).pop();
+                } else {
+                  captchaController.reset();
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Capctha anda salah')));
+                }
+              },
+              child: Icon(Icons.check),
+            ),
+          );
+        },
+      ),
+    );
   }
 }

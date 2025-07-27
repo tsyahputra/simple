@@ -31,9 +31,9 @@ class _AddInstancePageState extends State<AddInstancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Kantor')),
+      appBar: AppBar(title: Text('Tambah Kantor')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: BlocProvider(
           create: (context) => instanceCubit,
           child: BlocListener<InstanceCubit, InstanceState>(
@@ -41,8 +41,9 @@ class _AddInstancePageState extends State<AddInstancePage> {
               if (state is InstanceSubmitted) {
                 Navigator.pop(context, true);
               } else if (state is InstanceFail) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
               }
             },
             child: Form(
@@ -67,7 +68,7 @@ class _AddInstancePageState extends State<AddInstancePage> {
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _alamatController,
                     decoration: InputDecoration(
@@ -80,7 +81,7 @@ class _AddInstancePageState extends State<AddInstancePage> {
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   DropdownButtonFormField(
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -88,21 +89,16 @@ class _AddInstancePageState extends State<AddInstancePage> {
                       ),
                       labelText: 'Kabupaten',
                     ),
-                    items: listKab.map(
-                      (e) {
-                        return DropdownMenuItem(
-                          value: e,
-                          child: Text(e),
-                        );
-                      },
-                    ).toList(),
+                    items: listKab.map((e) {
+                      return DropdownMenuItem(value: e, child: Text(e));
+                    }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _kabupaten = value!;
                       });
                     },
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _provinsiController,
                     decoration: InputDecoration(
@@ -120,7 +116,7 @@ class _AddInstancePageState extends State<AddInstancePage> {
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _telpController,
                     decoration: InputDecoration(
@@ -131,7 +127,7 @@ class _AddInstancePageState extends State<AddInstancePage> {
                     ),
                     keyboardType: TextInputType.phone,
                   ),
-                  const SizedBox(height: 12.0),
+                  SizedBox(height: 12.0),
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -142,22 +138,24 @@ class _AddInstancePageState extends State<AddInstancePage> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 16.0),
+                  SizedBox(height: 16.0),
                   FilledButton.icon(
                     onPressed: () {
                       if (_formState.currentState!.validate()) {
-                        instanceCubit.addInstance(Instance(
-                          nama: _namaController.text,
-                          alamat: _alamatController.text,
-                          kabupaten: _kabupaten,
-                          provinsi: _provinsiController.text,
-                          telp: _telpController.text,
-                          email: _emailController.text,
-                        ));
+                        instanceCubit.addInstance(
+                          Instance(
+                            nama: _namaController.text,
+                            alamat: _alamatController.text,
+                            kabupaten: _kabupaten,
+                            provinsi: _provinsiController.text,
+                            telp: _telpController.text,
+                            email: _emailController.text,
+                          ),
+                        );
                       }
                     },
-                    icon: const Icon(Icons.save),
-                    label: const Text('Simpan'),
+                    icon: Icon(Icons.save),
+                    label: Text('Simpan'),
                   ),
                 ],
               ),

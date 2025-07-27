@@ -51,13 +51,14 @@ class _InstancesPageState extends State<InstancesPage> {
       child: BlocConsumer<InstanceCubit, InstanceState>(
         listener: (context, state) {
           if (state is InstanceFail) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
           }
         },
         builder: (context, state) {
           if (state is! InstancesLoaded) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           } else {
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -108,8 +109,9 @@ class _InstancesPageState extends State<InstancesPage> {
                             icon: const Icon(Icons.search),
                             tooltip: 'Search',
                             onPressed: () {
-                              instanceCubit
-                                  .onInstanceSearch(searchController.text);
+                              instanceCubit.onInstanceSearch(
+                                searchController.text,
+                              );
                             },
                           ),
                         ],

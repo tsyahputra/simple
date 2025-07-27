@@ -25,53 +25,59 @@ class _EditRolePageState extends State<EditRolePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => roleCubit,
-      child: BlocListener<RoleCubit, RoleState>(
-        listener: (context, state) {
-          if (state is RoleSubmitted) {
-            Navigator.pop(context, true);
-          } else if (state is RoleFail) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.errorMessage)));
-          }
-        },
-        child: Form(
-          key: _formState,
-          child: Column(
-            children: [
-              TextFormField(
-                autofocus: true,
-                controller: _namaController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
+    return Scaffold(
+      appBar: AppBar(title: Text('Ubah hak akses')),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(24.0),
+        child: BlocProvider(
+          create: (context) => roleCubit,
+          child: BlocListener<RoleCubit, RoleState>(
+            listener: (context, state) {
+              if (state is RoleSubmitted) {
+                Navigator.pop(context, true);
+              } else if (state is RoleFail) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
+              }
+            },
+            child: Form(
+              key: _formState,
+              child: Column(
+                children: [
+                  TextFormField(
+                    autofocus: true,
+                    controller: _namaController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      labelText: 'Nama lengkap',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Tidak boleh kosong';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.text,
+                    textCapitalization: TextCapitalization.sentences,
                   ),
-                  labelText: 'Nama lengkap',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Tidak boleh kosong';
-                  }
-                  return null;
-                },
-                keyboardType: TextInputType.text,
-                textCapitalization: TextCapitalization.sentences,
+                  SizedBox(height: 16.0),
+                  FilledButton.icon(
+                    onPressed: () {
+                      if (_formState.currentState!.validate()) {
+                        roleCubit.editRole(
+                          Role(id: widget.role.id, nama: _namaController.text),
+                        );
+                      }
+                    },
+                    icon: Icon(Icons.save),
+                    label: Text('Simpan'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16.0),
-              FilledButton.icon(
-                onPressed: () {
-                  if (_formState.currentState!.validate()) {
-                    roleCubit.editRole(Role(
-                      id: widget.role.id,
-                      nama: _namaController.text,
-                    ));
-                  }
-                },
-                icon: const Icon(Icons.save),
-                label: const Text('Simpan'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
