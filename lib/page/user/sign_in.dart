@@ -209,12 +209,7 @@ class _SignInPageState extends State<SignInPage> {
                           SizedBox(width: 12.0),
                           TextButton(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => GetOtpPage(),
-                                ),
-                              );
+                              getOTP();
                             },
                             child: Text('Lupa password'),
                           ),
@@ -235,6 +230,18 @@ class _SignInPageState extends State<SignInPage> {
         ),
       ],
     );
+  }
+
+  Future<void> getOTP() async {
+    var result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GetOtpPage()),
+    );
+    if (result != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<AuthCubit>().verifyCaptcha();
+      });
+    }
   }
 
   void signIn() {
