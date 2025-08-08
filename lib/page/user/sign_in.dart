@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_captcha/flutter_captcha.dart';
-import 'package:simple/cubit/user_cubit.dart';
+import 'package:simple/cubit/auth_cubit.dart';
 import 'package:simple/page/responsive/responsiveness.dart';
 import 'package:simple/page/user/get_otp.dart';
 import 'package:simple/page/widget/loading_indicator.dart';
@@ -27,8 +27,10 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   void initState() {
-    context.read<UserCubit>().verifyCaptcha();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthCubit>().verifyCaptcha();
+    });
   }
 
   @override
@@ -40,13 +42,9 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<UserCubit, UserState>(
+      body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
-          if (state is UserAuthenticated) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Anda berhasil masuk!')));
-          } else if (state is UserFail) {
+          if (state is AuthFail) {
             if (state.errorMessage == "Silahkan jawab CAPTCHA") {
               captchaController.reset();
               showCaptcha(context);
@@ -60,7 +58,7 @@ class _SignInPageState extends State<SignInPage> {
           }
         },
         builder: (context, state) {
-          if (state is UserLoading) {
+          if (state is AuthLoading) {
             return LoadingIndicator();
           }
           return kIsWeb
@@ -241,7 +239,7 @@ class _SignInPageState extends State<SignInPage> {
 
   void signIn() {
     if (_formState.currentState!.validate()) {
-      context.read<UserCubit>().masuk(
+      context.read<AuthCubit>().masuk(
         _emailController.text,
         _passwordController.text,
         '',

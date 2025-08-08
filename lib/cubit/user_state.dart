@@ -14,21 +14,12 @@ final class UserLoading extends UserState {}
 
 final class UserSubmitted extends UserState {}
 
-final class UserVerified extends UserState {}
+final class UserChanged extends UserState {}
 
 final class UserFail extends UserState {
   final String errorMessage;
 
   const UserFail(this.errorMessage);
-
-  @override
-  List<Object> get props => [errorMessage];
-}
-
-final class CaptchaFail extends UserState {
-  final String errorMessage;
-
-  const CaptchaFail(this.errorMessage);
 
   @override
   List<Object> get props => [errorMessage];
@@ -65,15 +56,6 @@ final class BeforeAddUser extends UserState {
 
   @override
   List<Object> get props => [instancesRoles];
-}
-
-final class UserAuthenticated extends UserState {
-  final UserLoggedIn userLoggedIn;
-
-  const UserAuthenticated({required this.userLoggedIn});
-
-  @override
-  List<Object> get props => [userLoggedIn];
 }
 
 final class TwoFASecretGenerated extends UserState {

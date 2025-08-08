@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
-import 'package:get_ip_address/get_ip_address.dart';
 import 'package:meta/meta.dart';
 import 'package:simple/model/role.dart';
 import 'package:simple/model/user.dart';
@@ -31,7 +30,7 @@ class UserCubit extends Cubit<UserState> {
     }
   }
 
-  Future<void> onUserInit(String lastSearchTerm) async {
+  Future<void> onUserInit() async {
     final userLoggedIn = await LocalStorage.getUserLoggedIn();
     try {
       final response = await _dio.get(
@@ -39,10 +38,7 @@ class UserCubit extends Cubit<UserState> {
         options: Options(
           headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
         ),
-        queryParameters: {
-          'offset': '0',
-          if (lastSearchTerm != '') 'search': lastSearchTerm,
-        },
+        queryParameters: {'offset': '0'},
       );
       if (response.statusCode == 200) {
         final users = Users.fromJson(response.data);
@@ -153,46 +149,209 @@ class UserCubit extends Cubit<UserState> {
     }
   }
 
-  Future<void> masuk(String email, String password, String fcmToken) async {
-    emit(UserLoading());
+  Future<void> beforeAddUser() async {
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
     try {
-      var ipAddress = IpAddress(type: RequestType.json);
-      dynamic ipData = await ipAddress.getIpAddress();
-      final response = await _dio.post(
-        AppUrl.masuk,
-        data: {
-          'email': email,
-          'password': password,
-          'fcm_token': fcmToken,
-          'ip': ipData['ip'],
-        },
+      final response = await _dio.get(
+        AppUrl.beforeAddUser,
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
       );
       if (response.statusCode == 200) {
-        UserLoggedIn userLoggedIn = UserLoggedIn.fromJson(response.data);
-        await LocalStorage.setUserProfile(userLoggedIn);
-        emit(UserAuthenticated(userLoggedIn: userLoggedIn));
+        InstancesRoles instancesRoles = InstancesRoles.fromJson(response.data);
+        emit(BeforeAddUser(instancesRoles));
       } else {
-        emit(UserFail(response.data['message']));
+        _handleError(
+          DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+          ),
+          emit as Emitter<UserState>,
+        );
       }
     } on DioException catch (e) {
       _handleError(e, emit as Emitter<UserState>);
     }
   }
 
-  Future<void> verifyCaptcha() async {
+  Future<void> addUser(User user, String password) async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.post(
+        AppUrl.addUser,
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+        data: {
+          "nama": user.nama,
+          "email": user.email,
+          "password": password,
+          "role_id": "${user.roleId}",
+          "instance_id": "${user.instanceId}",
+        },
+      );
+      emit(UserSubmitted());
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> editUser(User user, String password) async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.put(
+        '${AppUrl.editUser}/${user.id}',
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+        data: {
+          "nama": user.nama,
+          "email": user.email,
+          "password": password,
+          "role_id": "${user.roleId}",
+          "instance_id": "${user.instanceId}",
+        },
+      );
+      emit(UserSubmitted());
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> editUserOnly(User user) async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.patch(
+        '${AppUrl.editUserOnly}/${user.id}',
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+        data: {
+          "nama": user.nama,
+          "email": user.email,
+          "role_id": "${user.roleId}",
+          "instance_id": "${user.instanceId}",
+        },
+      );
+      emit(UserSubmitted());
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> changePassword(int userId, String password) async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.patch(
+        '${AppUrl.changePassword}/$userId',
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+        data: {"password": password},
+      );
+      await LocalStorage.clear();
+      // TODO: changed ?
+      emit(UserChanged());
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> deleteUser(int id) async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.delete(
+        AppUrl.users,
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+        data: {"id": id},
+      );
+      emit(UserSubmitted());
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> disable2FA(String userId) async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.get(
+        '${AppUrl.disable2FA}/$userId',
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+      );
+      emit(UserSubmitted());
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> generate2FASecret() async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      final response = await _dio.get(
+        AppUrl.generate2FASecret,
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+      );
+      emit(TwoFASecretGenerated(TwoFASecret.fromJson(response.data)));
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> verifyAndEnable2FA(String code) async {
+    emit(UserLoading());
+    final userLoggedIn = await LocalStorage.getUserLoggedIn();
+    try {
+      await _dio.post(
+        AppUrl.verifyEnable2FA,
+        options: Options(
+          headers: {'Authorization': 'Bearer ${userLoggedIn.accessToken}'},
+        ),
+        data: {"code": code},
+      );
+      emit(UserSubmitted());
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> verifyTwoFAResetPassword(String email, String code) async {
     emit(UserLoading());
     try {
-      var ipAddress = IpAddress(type: RequestType.json);
-      dynamic ipData = await ipAddress.getIpAddress();
       final response = await _dio.post(
-        AppUrl.verifyCaptcha,
-        data: {'ip': ipData['ip']},
+        AppUrl.verify2FAReset,
+        data: {"email": email, "code": code},
       );
-      if (response.statusCode == 200) {
-        emit(UserVerified());
-      } else {
-        emit(CaptchaFail(response.data['message']));
-      }
+      emit(ResetTokenReceived(response.data['reset_token']));
+    } on DioException catch (e) {
+      _handleError(e, emit as Emitter<UserState>);
+    }
+  }
+
+  Future<void> resetPassword(
+    String email,
+    String password,
+    String resetToken,
+  ) async {
+    try {
+      await _dio.post(
+        AppUrl.verify2FAReset,
+        data: {"email": email, "password": password, "reset_token": resetToken},
+      );
+      emit(UserSubmitted());
     } on DioException catch (e) {
       _handleError(e, emit as Emitter<UserState>);
     }

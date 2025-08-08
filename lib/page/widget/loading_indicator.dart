@@ -12,7 +12,7 @@ class LoadingIndicator extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: index.isEven
-                ? Theme.of(context).primaryColor
+                ? Theme.of(context).focusColor
                 : Theme.of(context).disabledColor,
           ),
         );

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:simple/cubit/auth_cubit.dart';
 import 'package:simple/cubit/user_cubit.dart';
+import 'package:simple/page/responsive/admin_base.dart';
 import 'package:simple/page/user/sign_in.dart';
-import 'package:simple/page/user/users_page.dart';
+import 'package:simple/page/widget/loading_indicator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,8 +17,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthCubit>(
+          create: (context) => AuthCubit()..checkAuthStatus(),
+        ),
+        BlocProvider<UserCubit>(create: (context) => UserCubit()),
+      ],
       child: MaterialApp(
         title: 'Simple',
         theme: ThemeData(
@@ -27,12 +34,26 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: BlocBuilder<UserCubit, UserState>(
+        home: BlocConsumer<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthFail) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
+            }
+          },
           builder: (context, state) {
             if (state is UserAuthenticated) {
-              return UsersPage();
+              switch (state.userLoggedIn.user!.roleId) {
+                case 1:
+                  return AdminBasePage(userLoggedIn: state.userLoggedIn);
+                default:
+                  return AdminBasePage(userLoggedIn: state.userLoggedIn);
+              }
+            } else if (state is UserUnauthenticated) {
+              return SignInPage();
             }
-            return SignInPage();
+            return Scaffold(body: LoadingIndicator());
           },
         ),
       ),
