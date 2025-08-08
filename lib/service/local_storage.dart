@@ -13,7 +13,6 @@ class LocalStorage {
   }
 
   static Future<UserLoggedIn> getUserLoggedIn() async {
-    final Dio dio = Dio();
     var userSimple = await storage.read(key: 'userLoggedIn');
     if (userSimple == null || userSimple.isEmpty || userSimple == '') {
       return UserLoggedIn(user: null, accessToken: '', refreshToken: '');
@@ -23,6 +22,7 @@ class LocalStorage {
     if (!tokenExpired) {
       return userLoggedIn;
     } else {
+      final Dio dio = Dio();
       final response = await dio.get(
         AppUrl.refreshToken,
         options: Options(

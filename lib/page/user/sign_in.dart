@@ -1,15 +1,14 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_captcha/flutter_captcha.dart';
 import 'package:simple/cubit/user_cubit.dart';
 import 'package:simple/page/responsive/responsiveness.dart';
 import 'package:simple/page/user/get_otp.dart';
-import 'package:simple/page/user_check.dart';
+import 'package:simple/page/widget/loading_indicator.dart';
 import 'package:simple/service/constants.dart';
-import 'package:simple/service/user_rest.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -19,7 +18,6 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
-  UserCubit userCubit = UserCubit(UserRest());
   final captchaController = FlutterCaptchaController(random: Random.secure())
     ..init();
   final _emailController = TextEditingController();
@@ -29,8 +27,8 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   void initState() {
+    context.read<UserCubit>().verifyCaptcha();
     super.initState();
-    userCubit.verifyCaptcha();
   }
 
   @override
@@ -42,39 +40,37 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocProvider(
-        create: (context) => userCubit,
-        child: BlocListener<UserCubit, UserState>(
-          listener: (context, state) {
-            if (state is UserFail) {
-              if (state.errorMessage == "Silahkan jawab CAPTCHA") {
-                captchaController.reset();
-                showCaptcha(context);
-              }
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
-            } else if (state is UserAuthenticated) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => UserCheckPoint(),
-                ),
-                (Route<dynamic> route) => false,
-              );
-            } else if (state is CaptchaFail) {
+      body: BlocConsumer<UserCubit, UserState>(
+        listener: (context, state) {
+          if (state is UserAuthenticated) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Anda berhasil masuk!')));
+          } else if (state is UserFail) {
+            if (state.errorMessage == "Silahkan jawab CAPTCHA") {
               captchaController.reset();
               showCaptcha(context);
             }
-          },
-          child: kIsWeb
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
+          } else if (state is CaptchaFail) {
+            captchaController.reset();
+            showCaptcha(context);
+          }
+        },
+        builder: (context, state) {
+          if (state is UserLoading) {
+            return LoadingIndicator();
+          }
+          return kIsWeb
               ? ResponsiveLayout(
                   largeScreen: largeLayout(),
                   mediumScreen: mediumLayout(),
                   smallScreen: smallLayout(),
                 )
-              : smallLayout(),
-        ),
+              : smallLayout();
+        },
       ),
     );
   }
@@ -115,13 +111,9 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Widget smallLayout() {
-    return Center(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Center(child: SizedBox(width: 375, child: loginForm())),
-        ),
-      ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(20.0),
+      child: Center(child: loginForm()),
     );
   }
 
@@ -213,9 +205,7 @@ class _SignInPageState extends State<SignInPage> {
                       OverflowBar(
                         children: [
                           FilledButton(
-                            onPressed: () {
-                              signIn();
-                            },
+                            onPressed: () => signIn(),
                             child: Text('Masuk'),
                           ),
                           SizedBox(width: 12.0),
@@ -251,42 +241,59 @@ class _SignInPageState extends State<SignInPage> {
 
   void signIn() {
     if (_formState.currentState!.validate()) {
-      userCubit.masuk(_emailController.text, _passwordController.text, '');
+      context.read<UserCubit>().masuk(
+        _emailController.text,
+        _passwordController.text,
+        '',
+      );
     }
   }
 
-  void showCaptcha(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) {
-          return Scaffold(
-            body: Center(
-              child: FlutterCaptcha(
-                controller: captchaController,
-                crossLine: (color: Theme.of(context).primaryColor, width: 10),
-                fit: BoxFit.cover,
-                draggingBuilder: (_, child) =>
-                    Opacity(opacity: 0.5, child: child),
-                child: Image.asset('images/pengayoman.png'),
+  Future<void> showCaptcha(BuildContext context) async {
+    if (context.mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) {
+            return Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      child: FlutterCaptcha(
+                        controller: captchaController,
+                        crossLine: (
+                          color: Theme.of(context).primaryColor,
+                          width: 2,
+                        ),
+                        fit: BoxFit.cover,
+                        draggingBuilder: (_, child) =>
+                            Opacity(opacity: 0.5, child: child),
+                        child: Image.asset('images/pengayoman.png'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                if (captchaController.checkSolution()) {
-                  Navigator.of(context).pop();
-                } else {
-                  captchaController.reset();
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Capctha anda salah')));
-                }
-              },
-              child: Icon(Icons.check),
-            ),
-          );
-        },
-      ),
-    );
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  if (captchaController.checkSolution()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    captchaController.reset();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Capctha anda salah')),
+                    );
+                  }
+                },
+                child: Icon(Icons.check),
+              ),
+            );
+          },
+        ),
+      );
+    }
   }
 }

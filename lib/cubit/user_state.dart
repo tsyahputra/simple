@@ -1,7 +1,12 @@
 part of 'user_cubit.dart';
 
 @immutable
-sealed class UserState {}
+sealed class UserState extends Equatable {
+  const UserState();
+
+  @override
+  List<Object> get props => [];
+}
 
 final class UserInitial extends UserState {}
 
@@ -11,10 +16,22 @@ final class UserSubmitted extends UserState {}
 
 final class UserVerified extends UserState {}
 
+final class UserFail extends UserState {
+  final String errorMessage;
+
+  const UserFail(this.errorMessage);
+
+  @override
+  List<Object> get props => [errorMessage];
+}
+
 final class CaptchaFail extends UserState {
   final String errorMessage;
 
-  CaptchaFail(this.errorMessage);
+  const CaptchaFail(this.errorMessage);
+
+  @override
+  List<Object> get props => [errorMessage];
 }
 
 final class UsersLoaded extends UserState {
@@ -22,53 +39,57 @@ final class UsersLoaded extends UserState {
   final bool hasReachedMax;
   final int total;
 
-  UsersLoaded({
-    this.users = const <User>[],
-    this.hasReachedMax = false,
-    this.total = 0,
+  const UsersLoaded({
+    required this.users,
+    required this.hasReachedMax,
+    required this.total,
   });
 
-  UsersLoaded copyWith({List<User>? users, bool? hasReachedMax, int? total}) {
-    return UsersLoaded(
-      users: users ?? this.users,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      total: total ?? this.total,
-    );
-  }
+  @override
+  List<Object> get props => [users, hasReachedMax, total];
 }
 
 final class UserLoaded extends UserState {
   final User user;
 
-  UserLoaded(this.user);
+  const UserLoaded(this.user);
+
+  @override
+  List<Object> get props => [user];
 }
 
 final class BeforeAddUser extends UserState {
   final InstancesRoles instancesRoles;
 
-  BeforeAddUser(this.instancesRoles);
+  const BeforeAddUser(this.instancesRoles);
+
+  @override
+  List<Object> get props => [instancesRoles];
 }
 
 final class UserAuthenticated extends UserState {
   final UserLoggedIn userLoggedIn;
 
-  UserAuthenticated(this.userLoggedIn);
-}
+  const UserAuthenticated({required this.userLoggedIn});
 
-final class UserFail extends UserState {
-  final String errorMessage;
-
-  UserFail(this.errorMessage);
+  @override
+  List<Object> get props => [userLoggedIn];
 }
 
 final class TwoFASecretGenerated extends UserState {
   final TwoFASecret twoFASecret;
 
-  TwoFASecretGenerated(this.twoFASecret);
+  const TwoFASecretGenerated(this.twoFASecret);
+
+  @override
+  List<Object> get props => [twoFASecret];
 }
 
 final class ResetTokenReceived extends UserState {
   final String resetToken;
 
-  ResetTokenReceived(this.resetToken);
+  const ResetTokenReceived(this.resetToken);
+
+  @override
+  List<Object> get props => [resetToken];
 }

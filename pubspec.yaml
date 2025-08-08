@@ -14,8 +14,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   bloc: ^9.0.0
   dartz: ^0.10.1
-  dio: ^5.8.0+1
+  dio: ^5.9.0
   dropdown_search: ^6.0.2
+  equatable: ^2.0.7
   flutter_bloc: ^9.1.1
   flutter_captcha: ^1.0.0
   flutter_secure_storage: ^9.2.4
@@ -25,6 +26,7 @@ dependencies:
   meta: ^1.16.0
   universal_html: ^2.2.4
   qr_flutter: ^4.1.0
+  flutter_spinkit: ^5.2.1
 
 dev_dependencies:
   flutter_test:
